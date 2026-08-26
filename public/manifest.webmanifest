@@ -1,0 +1,13 @@
+{
+  "name": "5 na 5",
+  "short_name": "5 na 5",
+  "description": "Rodinná tímová hra pre moderátora a veľkú obrazovku",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07152d",
+  "theme_color": "#07152d",
+  "lang": "sk",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
