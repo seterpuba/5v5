@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { BookOpen, CircleHelp, Gamepad2, Library, Settings } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { isCloudConfigured } from '../lib/gameStore'
 import { Brand } from './Brand'
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -9,7 +10,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="topbar">
         <Brand compact />
         <span className="topbar__mode">Moderátorský režim</span>
-        <span className="connection-pill"><i /> Lokálne pripravené</span>
+        <span className="connection-pill"><i /> {isCloudConfigured ? 'Online synchronizácia' : 'Lokálny režim'}</span>
       </header>
       <aside className="sidebar">
         <nav>
