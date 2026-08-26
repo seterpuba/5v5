@@ -105,10 +105,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
   switch (action.type) {
     case 'START_ROUND':
-      next = { ...state, phase: 'intro', strikes: 0, roundBank: 0, message: gameRules.rounds[state.roundIndex]?.label ?? 'Ďalšie kolo' }
+      next = {
+        ...loadQuestion(state, state.questionIndex),
+        phase: 'intro',
+        strikes: 0,
+        roundBank: 0,
+        message: gameRules.rounds[state.roundIndex]?.label ?? 'Ďalšie kolo',
+      }
       break
     case 'SHOW_QUESTION':
-      next = loadQuestion(state, state.questionIndex)
+      next = state.questionPrompt && state.answers.length
+        ? { ...state, phase: 'question', message: `Otázka ${state.questionIndex + 1}` }
+        : loadQuestion(state, state.questionIndex)
       break
     case 'REVEAL_ANSWER': {
       const target = state.answers.find((answer) => answer.id === action.answerId)
@@ -155,10 +163,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break
     case 'NEXT_ROUND': {
       const roundIndex = Math.min(gameRules.rounds.length - 1, state.roundIndex + 1)
-      next = {
+      const questionIndex = state.questionIndex + 1
+      const base: GameState = {
         ...state,
         roundIndex,
-        questionIndex: state.questionIndex + 1,
+        questionIndex,
         currentQuestionId: null,
         questionPrompt: '',
         answers: [],
@@ -172,6 +181,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           running: false,
           rows: makeFinalRows(state.questionIds.slice(state.questionIndex + 1)),
         } : state.final,
+        message: gameRules.rounds[roundIndex].label,
+      }
+      next = roundIndex === 4 ? base : {
+        ...loadQuestion(base, questionIndex),
+        phase: 'intro',
         message: gameRules.rounds[roundIndex].label,
       }
       break
@@ -271,6 +285,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 export function publicGameState(state: GameState): GameState {
   return {
     ...state,
+    questionPrompt: state.phase === 'intro' ? '' : state.questionPrompt,
     answers: state.answers.map((answer) => answer.revealed ? answer : { ...answer, text: '', points: 0 }),
     questionIds: [],
     currentQuestionId: null,

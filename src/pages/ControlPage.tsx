@@ -52,7 +52,7 @@ export function ControlPage() {
 
   if (!game) return <div className="loading-screen">Načítavam ovládač…</div>
   const round = gameRules.rounds[game.roundIndex]
-  const canShowQuestion = game.phase === 'lobby' || game.phase === 'intro' || game.phase === 'round-result'
+  const canShowQuestion = game.phase === 'lobby' || game.phase === 'intro'
 
   return (
     <div className="control-page">
@@ -68,7 +68,7 @@ export function ControlPage() {
         <section className="control-main">
           {game.phase === 'final' ? <FinalControl game={game} dispatch={dispatch} /> : <>
             <div className="control-question">
-              <div className="control-question__meta"><span>Otázka {game.questionIndex + 1}</span><span>Bank <b>{game.roundBank}</b></span></div>
+              <div className="control-question__meta"><span>Otázka {game.questionIndex + 1}</span>{game.phase === 'intro' && <span>Náhľad moderátora · na obrazovke skryté</span>}<span>Bank <b>{game.roundBank}</b></span></div>
               <h1>{game.questionPrompt || 'Otázka ešte nie je zobrazená'}</h1>
             </div>
             <AnswerBoard answers={game.answers} control onReveal={(answerId) => dispatch({ type: 'REVEAL_ANSWER', answerId }, '/media/reveal.mp3')} />

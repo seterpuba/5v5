@@ -138,6 +138,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .answer-chips b { color: #0875dd; margin-left: 5px; }
 .scoring-note { color: #7b899b; font-size: 12px; margin: 13px 0 4px; }
 .source-link { color: #0875dd; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; }
+.source-note { color: #8a98a9; font-size: 11px; line-height: 1.45; margin: 5px 0 0; }
 .empty-state, .board-empty { padding: 60px; text-align: center; color: #8090a4; border: 1px dashed #ccd6e3; border-radius: 14px; }
 
 /* Setup */

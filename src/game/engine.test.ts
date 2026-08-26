@@ -10,6 +10,16 @@ describe('game engine', () => {
     expect(publicGameState(game).answers[0].text).toBe('')
   })
 
+  it('preloads the next question for the moderator while keeping it off the public intro', () => {
+    let game = createGame('A', 'B', [questions[0].id])
+    game = gameReducer(game, { type: 'START_ROUND' })
+    expect(game.phase).toBe('intro')
+    expect(game.questionPrompt).toBe(questions[0].prompt)
+    expect(game.answers[0].text).toBe(questions[0].answers[0].text)
+    expect(publicGameState(game).questionPrompt).toBe('')
+    expect(publicGameState(game).answers[0].text).toBe('')
+  })
+
   it('applies the round multiplier when revealing an answer', () => {
     let game = createGame('A', 'B', [questions[0].id])
     game = gameReducer(game, { type: 'SHOW_QUESTION' })
@@ -39,14 +49,14 @@ describe('game engine', () => {
 
   it('scores an exact or aliased answer in the final', () => {
     let game = createGame('A', 'B', questions.slice(0, 6).map((question) => question.id))
-    game = gameReducer({ ...game, phase: 'final' }, { type: 'FINAL_SAVE_ANSWER', text: 'Česká republika' })
-    expect(game.final.rows[0].playerOne.points).toBe(20)
+    game = gameReducer({ ...game, phase: 'final' }, { type: 'FINAL_SAVE_ANSWER', text: 'večera' })
+    expect(game.final.rows[0].playerOne.points).toBe(52)
   })
 
   it('does not expose unrevealed final answers publicly', () => {
     let game = createGame('A', 'B', questions.slice(0, 6).map((question) => question.id))
-    game = gameReducer({ ...game, phase: 'final' }, { type: 'FINAL_SAVE_ANSWER', text: 'Česko' })
-    expect(game.final.rows[0].playerOne.text).toBe('Česko')
+    game = gameReducer({ ...game, phase: 'final' }, { type: 'FINAL_SAVE_ANSWER', text: 'večera' })
+    expect(game.final.rows[0].playerOne.text).toBe('večera')
     expect(publicGameState(game).final.rows[0].playerOne.text).toBe('')
   })
 })

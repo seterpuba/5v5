@@ -16,8 +16,8 @@ export function RulesPage() {
         <div><span className="eyebrow">Bodovanie</span><h2>Priebeh zápasu</h2></div>
         {gameRules.rounds.map((round) => <div className="round-row" key={round.number}><b>{round.number}</b><span>{round.label}</span><strong>{round.number < 5 ? `×${round.multiplier} body` : `cieľ ${gameRules.finalTarget}`}</strong></div>)}
       </section>
-      <section className="fair-play-note"><ShieldCheck /><div><h2>Čistá a overená hra</h2><p>Otázky neobsahujú 18+ obsah, vulgarizmy ani ponižovanie. Faktické odpovede majú uvedený zdroj. Názorová otázka môže používať body iba zo skutočne zozbieraného prieskumu.</p></div></section>
-      <section className="moderator-tips"><h2>Tipy pre moderátora</h2><ul><li><Clock3 /> Pred hrou otestujte zvuk a režim celej obrazovky.</li><li><Users /> Pri synonymách rozhoduje moderátor podľa uvedených uznávaných variantov.</li><li><Trophy /> Herné body pri faktických otázkach nie sú vydávané za výsledok prieskumu.</li></ul></section>
+      <section className="fair-play-note"><ShieldCheck /><div><h2>Čistá a overená hra</h2><p>Otázky neobsahujú 18+ obsah, vulgarizmy ani ponižovanie. Body vychádzajú zo zverejnených prieskumov alebo štatistických rebríčkov a každá otázka má uvedený zdroj aj vzorku.</p></div></section>
+      <section className="moderator-tips"><h2>Tipy pre moderátora</h2><ul><li><Clock3 /> Pred hrou otestujte zvuk a režim celej obrazovky.</li><li><Users /> Počas úvodu kola vidí otázku a všetky odpovede iba moderátor; prezentácia ich odhalí až po potvrdení.</li><li><Trophy /> Ak prieskum umožnil viac odpovedí, súčet bodov na tabuli môže byť vyšší než 100.</li></ul></section>
     </AppShell>
   )
 }

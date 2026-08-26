@@ -7,7 +7,8 @@ describe('verified question bank', () => {
   it('contains only approved family-friendly questions', () => {
     for (const question of questions) {
       expect(question.familyFriendly).toBe(true)
-      expect(question.status).toBe('verified')
+      expect(question.kind).toBe('survey')
+      expect(question.status).toBe('surveyed')
       const searchable = [question.prompt, ...question.answers.flatMap((answer) => [answer.text, ...answer.aliases])].join(' ').toLowerCase()
       for (const word of prohibited) expect(searchable).not.toContain(word)
     }
@@ -19,6 +20,7 @@ describe('verified question bank', () => {
       expect(() => new URL(question.source.url)).not.toThrow()
       expect(question.source.url.startsWith('https://')).toBe(true)
       expect(question.source.verifiedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(question.source.note?.length).toBeGreaterThan(15)
     }
   })
 
