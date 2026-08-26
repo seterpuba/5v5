@@ -1,10 +1,11 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
 import type { GameState } from '../types'
 import { createGame, publicGameState } from '../game/engine'
 
 const storageKey = (id: string) => `5na5:game:${id}`
 const activeKey = '5na5:active-game'
 const channelName = '5na5:live'
+const realtimeTopic = (code: string) => `game-live:${code}`
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
@@ -12,6 +13,9 @@ export const isCloudConfigured = Boolean(supabaseUrl && supabaseKey)
 
 let supabase: SupabaseClient | null = null
 if (isCloudConfigured) supabase = createClient(supabaseUrl, supabaseKey)
+
+const controllerStates = new Map<string, GameState>()
+const controllerChannels = new Map<string, RealtimeChannel>()
 
 async function ensureCloudSession() {
   if (!supabase) return null
@@ -37,6 +41,39 @@ function broadcast(game: GameState) {
   window.dispatchEvent(new CustomEvent('5na5-game', { detail: game }))
 }
 
+function sendRealtime(channel: RealtimeChannel, event: string, payload: object) {
+  void channel.send({ type: 'broadcast', event, payload }).catch((error) => {
+    console.warn('Realtime sync failed:', error)
+  })
+}
+
+function publishPublicGame(game: GameState) {
+  if (!supabase) return
+  const code = game.shareCode
+  controllerStates.set(code, publicGameState(game))
+
+  const existing = controllerChannels.get(code)
+  if (existing) {
+    sendRealtime(existing, 'game_state', controllerStates.get(code)!)
+    return
+  }
+
+  const channel = supabase
+    .channel(realtimeTopic(code))
+    .on('broadcast', { event: 'request_state' }, () => {
+      const latest = controllerStates.get(code)
+      if (latest) sendRealtime(channel, 'game_state', latest)
+    })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        const latest = controllerStates.get(code)
+        if (latest) sendRealtime(channel, 'game_state', latest)
+      }
+    })
+
+  controllerChannels.set(code, channel)
+}
+
 export function getActiveGameId(): string | null {
   return localStorage.getItem(activeKey)
 }
@@ -45,6 +82,7 @@ export async function saveGame(game: GameState): Promise<void> {
   localStorage.setItem(storageKey(game.id), JSON.stringify(game))
   localStorage.setItem(activeKey, game.id)
   broadcast(game)
+  publishPublicGame(game)
 
   if (supabase) {
     try { await ensureCloudSession() } catch (error) { console.warn('Cloud sign-in failed:', error) }
@@ -107,14 +145,27 @@ export function subscribeToLocalGame(callback: (game: GameState) => void): () =>
 
 export function subscribeToCloudGame(gameId: string, callback: (game: GameState) => void): () => void {
   if (!supabase) return () => undefined
-  const channel = supabase
-    .channel(`game:${gameId}`)
+  const liveChannel = supabase
+    .channel(realtimeTopic(gameId))
+    .on('broadcast', { event: 'game_state' }, ({ payload }) => {
+      const state = payload as GameState | undefined
+      if (state?.id && state.shareCode === gameId) callback(state)
+    })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') sendRealtime(liveChannel, 'request_state', {})
+    })
+
+  const databaseChannel = supabase
+    .channel(`game-database:${gameId}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'games_public', filter: `share_code=eq.${gameId}` }, (payload) => {
       const publicState = (payload.new as { public_state?: GameState }).public_state
       if (publicState) callback(publicState)
     })
     .subscribe()
-  return () => { void supabase?.removeChannel(channel) }
+  return () => {
+    void supabase?.removeChannel(liveChannel)
+    void supabase?.removeChannel(databaseChannel)
+  }
 }
 
 export async function getCloudDeviceIdentity(): Promise<string | null> {
