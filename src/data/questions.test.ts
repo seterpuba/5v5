@@ -4,6 +4,10 @@ import { questions } from './questions'
 const prohibited = ['sex', 'porno', 'alkohol', 'droga', 'hazard', 'nahý', 'naked']
 
 describe('verified question bank', () => {
+  it('contains a full game-ready bank', () => {
+    expect(questions.length).toBeGreaterThanOrEqual(60)
+  })
+
   it('contains only approved family-friendly questions', () => {
     for (const question of questions) {
       expect(question.familyFriendly).toBe(true)

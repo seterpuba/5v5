@@ -1,8 +1,8 @@
-import { ArrowRight, CheckCircle2, CloudOff, Gamepad2, Library, MonitorPlay, Plus } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Cloud, CloudOff, Gamepad2, Library, MonitorPlay, Plus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { questions } from '../data/questions'
-import { getActiveGameId } from '../lib/gameStore'
+import { getActiveGameId, isCloudConfigured } from '../lib/gameStore'
 
 export function AdminDashboard() {
   const navigate = useNavigate()
@@ -15,8 +15,11 @@ export function AdminDashboard() {
       </section>
 
       <div className="status-banner">
-        <CloudOff size={22} />
-        <div><strong>Lokálny demo režim</strong><span>Funguje medzi kartami tohto zariadenia. Pre mobil a projektor na rôznych zariadeniach neskôr pripojíme Supabase.</span></div>
+        {isCloudConfigured ? <Cloud size={22} /> : <CloudOff size={22} />}
+        <div>
+          <strong>{isCloudConfigured ? 'Supabase je pripojený' : 'Lokálny demo režim'}</strong>
+          <span>{isCloudConfigured ? 'Mobil, počítač a projektor sa môžu synchronizovať cez internet.' : 'Funguje iba medzi kartami tohto zariadenia. Prepojenie medzi zariadeniami vyžaduje Supabase.'}</span>
+        </div>
       </div>
 
       <div className="dashboard-grid">

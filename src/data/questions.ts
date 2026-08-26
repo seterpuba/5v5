@@ -1,4 +1,5 @@
 import type { GameAnswer, GameQuestion, QuestionPack, QuestionSource } from '../types'
+import { additionalQuestions } from './additionalQuestions'
 
 const verifiedAt = '2026-08-26'
 type AnswerSeed = [id: string, text: string, points: number, aliases?: string[]]
@@ -11,7 +12,7 @@ function source(label: string, url: string, note: string): QuestionSource {
   return { label, url, note, verifiedAt }
 }
 
-export const questions: GameQuestion[] = [
+const coreQuestions: GameQuestion[] = [
   {
     id: 'valentine-gifts',
     prompt: 'Čo ľudia najčastejšie darujú na Valentína?',
@@ -307,6 +308,8 @@ export const questions: GameQuestion[] = [
     source: source('Pew Research Center – Global Religious Landscape 2010–2020', 'https://www.pewresearch.org/religion/2025/06/09/christian-population-change/', 'Odhady pre rok 2020 založené na viac než 2 700 sčítaniach a prieskumoch v 201 krajinách a územiach; všetky kresťanské denominácie sú počítané spolu.'),
   },
 ]
+
+export const questions: GameQuestion[] = [...coreQuestions, ...additionalQuestions]
 
 export const questionPacks: QuestionPack[] = [
   {
